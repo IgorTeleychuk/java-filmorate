@@ -20,6 +20,9 @@ public class UserController {
     @PostMapping(value = "/users")
     public User addNewUser(@Valid @RequestBody User user) throws ValidationException {
         if (userValidation(user)) {
+//            if(user.getName() == null){
+//                user.setName(user.getLogin());
+//            }
             user.setId(getNextUserId());
             users.put(user.getId(), user);
             log.info("A new user has been added");
@@ -63,7 +66,7 @@ public class UserController {
             throw new ValidationException("The login cannot be empty and contain spaces");
         }
         if (user.getName() == null  || user.getName().isBlank() || user.getName().isEmpty()) {
-            b = false;
+            b = true;
             user.setName(user.getLogin());
         }
         if (user.getBirthday().isAfter(LocalDate.now())) {

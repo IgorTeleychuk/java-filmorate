@@ -65,7 +65,6 @@ class UserControllerTest {
         assertThrows(ValidationException.class, () -> userController.addNewUser(userIncorrectEmail));
         assertThrows(ValidationException.class, () -> userController.addNewUser(userLoginEmpty));
         assertThrows(ValidationException.class, () -> userController.addNewUser(userIncorrectLogin));
-        assertThrows(ValidationException.class, () -> userController.addNewUser(userNameEmpty));
         assertThrows(ValidationException.class, () -> userController.addNewUser(userBirthdayAfterDateNow));
 
     }
