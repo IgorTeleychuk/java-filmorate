@@ -13,16 +13,14 @@ import java.util.Map;
 
 @Slf4j
 @RestController
+@RequestMapping(value = "/users")
 public class UserController {
     private final Map<Integer, User> users = new HashMap<>();
     protected static int nextUserId = 0;
 
-    @PostMapping(value = "/users")
-    public User addNewUser(@Valid @RequestBody User user) throws ValidationException {
+    @PostMapping
+    public User addNewUser(@Valid @RequestBody User user) {
         if (userValidation(user)) {
-//            if(user.getName() == null){
-//                user.setName(user.getLogin());
-//            }
             user.setId(getNextUserId());
             users.put(user.getId(), user);
             log.info("A new user has been added");
@@ -33,8 +31,8 @@ public class UserController {
         }
     }
 
-    @PutMapping(value = "/users")
-    public User updateUser(@Valid @RequestBody User user) throws ValidationException {
+    @PutMapping
+    public User updateUser(@Valid @RequestBody User user) {
         if (userValidation(user)) {
             if (!(users.keySet().contains(user.getId()))) {
                 throw new ValidationException("User unknown");
@@ -48,14 +46,14 @@ public class UserController {
         }
     }
 
-    @GetMapping("/users")
+    @GetMapping
     public Collection<User> returnUsers() {
         Collection<User> userList = users.values();
         log.info("Received a request for a list of users");
         return userList;
     }
 
-    private boolean userValidation(User user) throws ValidationException {
+    private boolean userValidation(User user) {
         boolean b = true;
         if ((user.getEmail() == null) || user.getEmail().isBlank() || !(user.getEmail().contains("@"))) {
             b = false;
@@ -65,7 +63,7 @@ public class UserController {
             b = false;
             throw new ValidationException("The login cannot be empty and contain spaces");
         }
-        if (user.getName() == null  || user.getName().isBlank() || user.getName().isEmpty()) {
+        if (user.getName() == null  || user.getName().isBlank()) {
             b = true;
             user.setName(user.getLogin());
         }

@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
+import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
@@ -12,13 +13,15 @@ import java.util.Map;
 
 @Slf4j
 @RestController
+@RequestMapping("/films")
 public class FilmController {
 
     private final Map<Integer, Film> films = new HashMap<>();
     protected static int nextFilmId = 0;
+    private final LocalDate earlyDate = LocalDate.of(1895, 12, 28);
 
-    @PostMapping("/films")
-    public Film addNewFilm( @RequestBody Film film) throws ValidationException {
+    @PostMapping
+    public Film addNewFilm(@Valid @RequestBody Film film) {
         if (filmValidation(film)) {
             film.setId(getNextFilmId());
             films.put(film.getId(), film);
@@ -30,8 +33,8 @@ public class FilmController {
         }
     }
 
-    @PutMapping(value = "/films")
-    public Film updateFilm(@RequestBody Film film) throws ValidationException {
+    @PutMapping
+    public Film updateFilm(@Valid @RequestBody Film film) {
         if (filmValidation(film)) {
             if (!(films.keySet().contains(film.getId()))) {
                 throw new ValidationException("Film unknown");
@@ -45,14 +48,14 @@ public class FilmController {
         }
     }
 
-    @GetMapping("/films")
+    @GetMapping
     public Collection<Film> returnFilms() {
         Collection<Film> filmList = films.values();
         log.info("Received a request for a list of movies");
         return filmList;
     }
 
-    private boolean filmValidation (Film film) throws ValidationException {
+    private boolean filmValidation (Film film) {
         boolean b = true;
         if  (film.getName() == null || film.getName().isBlank()) {
             b = false;
@@ -62,7 +65,7 @@ public class FilmController {
             b = false;
             throw new ValidationException("The maximum length of the description is 200 characters");
         }
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
+        if (film.getReleaseDate().isBefore(earlyDate)) {
             b = false;
             throw new ValidationException("Release date — no earlier than December 28, 1895");
         }
