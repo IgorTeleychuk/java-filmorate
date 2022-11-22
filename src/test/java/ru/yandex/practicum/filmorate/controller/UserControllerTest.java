@@ -19,8 +19,5 @@ class UserControllerTest {
 
     @Test
     void validationUserTest() {
-        User user = new User(); // test null
-        assertThrows(ValidationException.class, () -> userController.addNewUser(user));
-
     }
 }

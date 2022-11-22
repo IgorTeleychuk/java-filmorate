@@ -18,8 +18,5 @@ class FilmControllerTest {
 
     @Test
     void validationFilmTest() {
-        Film film6 = new Film(); // test null
-        assertThrows(ValidationException.class, () -> filmController.addNewFilm(film6));
-
     }
 }
