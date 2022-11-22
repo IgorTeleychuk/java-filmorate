@@ -22,30 +22,22 @@ public class FilmController {
 
     @PostMapping
     public Film addNewFilm(@Valid @RequestBody Film film) {
-        if (filmValidation(film)) {
-            film.setId(getNextFilmId());
-            films.put(film.getId(), film);
-            log.info("A new film has been added");
-            return film;
-        } else {
-            log.info("The film failed validation");
-            throw new ValidationException("Film was not added");
-        }
+        filmValidation(film);
+        film.setId(getNextFilmId());
+        films.put(film.getId(), film);
+        log.info("A new film has been added");
+        return film;
     }
 
     @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film) {
-        if (filmValidation(film)) {
-            if (!(films.keySet().contains(film.getId()))) {
-                throw new ValidationException("Film unknown");
-            }
-            films.put(film.getId(), film);
-            log.info("Film was updated");
-            return film;
-        } else {
-            log.info("The film failed validation");
-            throw new ValidationException("Film was not updated");
+        filmValidation(film);
+        if (!(films.keySet().contains(film.getId()))) {
+            throw new ValidationException("Film unknown");
         }
+        films.put(film.getId(), film);
+        log.info("Film was updated");
+        return film;
     }
 
     @GetMapping
@@ -57,21 +49,10 @@ public class FilmController {
 
     private boolean filmValidation (Film film) {
         boolean b = true;
-        if  (film.getName() == null || film.getName().isBlank()) {
-            b = false;
-            throw new ValidationException("The name cannot be empty");
-        }
-        if (film.getDescription().length() > 200) {
-            b = false;
-            throw new ValidationException("The maximum length of the description is 200 characters");
-        }
         if (film.getReleaseDate().isBefore(earlyDate)) {
+            log.info("The film failed validation");
             b = false;
             throw new ValidationException("Release date — no earlier than December 28, 1895");
-        }
-        if (film.getDuration() <= 0) {
-            b = false;
-            throw new ValidationException("The duration of the film should be positive");
         }
         return b;
     }

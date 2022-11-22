@@ -18,33 +18,9 @@ class UserControllerTest {
     }
 
     @Test
-    void createUser() {
-        User user = new User();
-        user.setEmail("test@mail.ru");
-        user.setLogin("Login");
-        user.setName("Test");
-        user.setBirthday(LocalDate.of(2000, 12, 10));
-
-        User userLoginEmpty = new User();
-        userLoginEmpty.setEmail("test@mail.ru");
-        userLoginEmpty.setName("Test");
-        userLoginEmpty.setBirthday(LocalDate.of(2000, 12, 10));
-
-        User userIncorrectLogin = new User();
-        userIncorrectLogin.setEmail("test@mail.ru");
-        userIncorrectLogin.setLogin("Login test");
-        userIncorrectLogin.setName("Test");
-        userIncorrectLogin.setBirthday(LocalDate.of(2000, 12, 10));
-
-        User userBirthdayAfterDateNow = new User();
-        userBirthdayAfterDateNow.setEmail("test@mail.ru");
-        userBirthdayAfterDateNow.setLogin("Login");
-        userBirthdayAfterDateNow.setName("Test");
-        userBirthdayAfterDateNow.setBirthday(LocalDate.of(2023, 12, 10));
-
-        assertThrows(ValidationException.class, () -> userController.addNewUser(userLoginEmpty));
-        assertThrows(ValidationException.class, () -> userController.addNewUser(userIncorrectLogin));
-        assertThrows(ValidationException.class, () -> userController.addNewUser(userBirthdayAfterDateNow));
+    void validationUserTest() {
+        User user = new User(); // test null
+        assertThrows(ValidationException.class, () -> userController.addNewUser(user));
 
     }
 }
