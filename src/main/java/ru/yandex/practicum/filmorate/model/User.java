@@ -6,6 +6,8 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PastOrPresent;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class User {
@@ -19,4 +21,5 @@ public class User {
     @NotNull
     @PastOrPresent
     private LocalDate birthday;
+    private Set<Integer> friendsId = new HashSet<>();
 }
