@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.Data;
+import ru.yandex.practicum.filmorate.customannotations.DateCheking;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -18,6 +19,8 @@ public class Film {
     @NotBlank
     @Size(max = 200)
     private String description;
+    @NotNull
+    @DateCheking(date = "28/12/1895")
     private LocalDate releaseDate;
     @Positive
     private int duration;

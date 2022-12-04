@@ -1,116 +1,29 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.Optional;
 
-@Service
-public class UserService implements UserServiceInterface{
-    private final FilmStorage filmStorage;
-    private final UserStorage userStorage;
+public interface UserService {
+    User addNew(User user);
 
-    @Autowired
-    public UserService(FilmStorage filmStorage, UserStorage userStorage) {
-        this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
-    }
+    User update(User user);
 
-    @Override
-    public User addUser(User user) {
-        return userStorage.addNewUser(user);
-    }
+    User remove(User user);
 
-    @Override
-    public User updateUser(User user) {
-        return userStorage.updateUser(user);
-    }
+    Optional<User> getById(Integer id);
 
-    @Override
-    public User removeUser(User user) {
-        return userStorage.removeUser(user);
-    }
+    List<User> getList();
 
-    @Override
-    public User getUser(Integer id) {
-        return userStorage.getUser(id);
-    }
+    User addFriend(Integer id, Integer friendId);
 
-    @Override
-    public List<User> getListUsers() {
-        return userStorage.getListUsers();
-    }
+    User removeFriend(Integer userId, Integer friendId);
 
-    @Override
-    public User addFriend(Integer userId, Integer friendId) {
-        User user = userStorage.getUser(userId);
-        User friendUser = userStorage.getUser(friendId);
+    List<Optional<User>> getCommonFriends(Integer userId, Integer otherId);
 
-        if (user == null) {
-            throw new UserNotFoundException("The user was not found");
-        }
+    List<Optional<User>> getAllFriends(Integer userId);
 
-        if (friendUser == null) {
-            throw new UserNotFoundException("The user was not found");
-        }
-
-        user.getFriendsId().add(friendId);
-        friendUser.getFriendsId().add(userId);
-
-        userStorage.updateUser(friendUser);
-        return userStorage.updateUser(user);
-    }
-
-    @Override
-    public User removeFriend(Integer userId, Integer friendId) {
-        User user = userStorage.getUser(userId);
-        User friendUser = userStorage.getUser(friendId);
-
-        if (user == null) {
-            throw new UserNotFoundException("The user was now found");
-        }
-
-        if (friendUser == null) {
-            throw new UserNotFoundException("The user was not found");
-        }
-        user.getFriendsId().remove(friendUser);
-        friendUser.getFriendsId().remove(user);
-
-        userStorage.updateUser(friendUser);
-        return userStorage.updateUser(user);
-    }
-
-    @Override
-    public List<User> getCommonFriends(Integer userId, Integer otherId) {
-        User user = userStorage.getUser(userId);
-        User otherUser = userStorage.getUser(otherId);
-
-        if(user == null) {
-            throw new UserNotFoundException("The user was not found");
-        }
-
-        if (otherUser == null) {
-            throw new UserNotFoundException("The user was not found");
-        }
-
-        return user.getFriendsId()
-                .stream()
-                .filter(otherUser.getFriendsId()::contains)
-                .map(userStorage::getUser)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<User> getAllFriends(Integer userId) {
-        return userStorage.getUser(userId).getFriendsId()
-                .stream()
-                .map(this::getUser)
-                .collect(Collectors.toList());
-
-    }
+    Map<Integer, User> findUser();
 }

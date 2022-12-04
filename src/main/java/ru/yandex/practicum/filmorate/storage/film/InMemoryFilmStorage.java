@@ -1,67 +1,59 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-@Component
+@Repository
 public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Integer, Film> films = new HashMap<>();
     protected static int nextFilmId = 0;
-    private final LocalDate earlyDate = LocalDate.of(1895, 12, 28);
+    private static final LocalDate earlyDate = LocalDate.of(1895, 12, 28);
 
     @Override
-    public Film addNewFilm(Film film) {
-        if(!film.getReleaseDate().isBefore(earlyDate)){
-            nextFilmId++;
-            film.setId(nextFilmId);
-            films.put(film.getId(), film);
-        } else {
-            throw new ValidationException("Release date — no earlier than December 28, 1895");
-        }
+    public Film addNew(Film film) {
+        nextFilmId++;
+        film.setId(nextFilmId);
+        films.put(film.getId(), film);
         return film;
     }
 
     @Override
-    public Film updateFilm(Film film) {
-        if(films.containsKey(film.getId())){
-            film.setId(film.getId());
-            films.put(film.getId(), film);
-        } else {
-            throw new FilmNotFoundException("The film was not found");
-        }
+    public Film update(Film film) {
+        film.setId(film.getId());
+        films.put(film.getId(), film);
         return film;
     }
 
     @Override
-    public Film removeFilm(Film film) {
-        if(!films.containsKey(film.getId())) {
-            throw new FilmNotFoundException("The film was not found");
-        } else {
-            Film removeFilm = films.get(film.getId());
-            films.remove(film.getId());
-            return removeFilm;
-        }
+    public Film remove(Film film) {
+        Film removeFilm = films.get(film.getId());
+        films.remove(film.getId());
+        return removeFilm;
     }
 
     @Override
-    public Film getFilm(Integer id) {
-        if(films.containsKey(id)){
-            return films.get(id);
-        } else {
-            throw new FilmNotFoundException("The film was not found");
-        }
+    public Optional<Film> getById(Integer id) {
+            return Optional.of(films.get(id));
     }
 
     @Override
-    public List<Film> getListFilms() {
+    public List<Film> getList() {
         return new ArrayList<>(films.values());
+    }
+
+    @Override
+    public Map<Integer, Film> findFilm() {
+        return films;
+    }
+
+    @Override
+    public LocalDate getEarlyDate() {
+        return earlyDate;
     }
 }
