@@ -5,11 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
@@ -33,11 +29,7 @@ public class FilmController {
     @GetMapping("/{id}")
     public Film getById(@PathVariable Integer id) {
         log.info("Request GET /films/{id} received");
-        if(filmService.findFilm().containsKey(id)){
-            return filmService.getById(id).get();
-        } else {
-            throw new FilmNotFoundException("The film was not found");
-        }
+            return filmService.getById(id);
     }
 
     @GetMapping("/popular")
@@ -50,25 +42,17 @@ public class FilmController {
     @ResponseStatus(HttpStatus.CREATED)
     public Film addNew(@Valid @RequestBody Film film) {
         log.info("Request POST /films received");
-        if(!film.getReleaseDate().isBefore(filmService.getEarlyDate())){
         Film addFilm = filmService.addNew(film);
         log.info("A new film has been added");
         return addFilm;
-        } else {
-            throw new ValidationException("Release date — no earlier than December 28, 1895");
-        }
     }
 
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
         log.info("Request PUT /films received");
-        if(filmService.findFilm().containsKey(film.getId())){
         Film updateFilm = filmService.update(film);
         log.info("Film was updated");
         return updateFilm;
-        } else {
-            throw new FilmNotFoundException("The film was not found");
-        }
     }
 
     @PutMapping("/{id}/like/{userId}")
@@ -82,24 +66,17 @@ public class FilmController {
     @DeleteMapping("/{id}")
     public Film deleteById(@PathVariable Integer id) {
         log.info("Request DELETE /users/{id}");
-        if(!filmService.findFilm().containsKey(id)) {
-            throw new UserNotFoundException("The user was not found");
-        } else {
-            Film removeFilm = filmService.remove(filmService.getById(id).get());
+            Film removeFilm = filmService.remove(id);
             log.info("User was deleted");
             return removeFilm;
-        }
     }
 
     @DeleteMapping("/{id}/like/{userId}")
     public Film removeLike(@PathVariable Integer id, @PathVariable Integer userId) {
         log.info("Request DELETE /films/{id}/like/{userId} received");
-        if (id < 1 || userId < 1) {
-            throw new UserNotFoundException("Incorrect Id");
-        } else {
-            Film film = filmService.removeLike(id, userId);
-            log.info("FLike was deleted");
-            return film;
-        }
+        Film film = filmService.removeLike(id, userId);
+        log.info("FLike was deleted");
+        return film;
+
     }
 }

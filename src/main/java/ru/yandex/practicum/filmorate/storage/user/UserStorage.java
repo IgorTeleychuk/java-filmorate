@@ -11,11 +11,10 @@ public interface UserStorage {
 
     User update(User user);
 
-    User remove(User user);
+    User remove(Integer id);
 
     Optional<User> getById(Integer id);
 
     List<User> getList();
 
-    Map<Integer, User> findUser();
 }

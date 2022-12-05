@@ -11,9 +11,9 @@ public interface UserService {
 
     User update(User user);
 
-    User remove(User user);
+    User remove(Integer id);
 
-    Optional<User> getById(Integer id);
+    User getById(Integer id);
 
     List<User> getList();
 
@@ -23,7 +23,7 @@ public interface UserService {
 
     List<Optional<User>> getCommonFriends(Integer userId, Integer otherId);
 
-    List<Optional<User>> getAllFriends(Integer userId);
+    List<User> getAllFriends(Integer userId);
 
-    Map<Integer, User> findUser();
+    void nameEqualsLogin(User user);
 }

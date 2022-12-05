@@ -2,8 +2,6 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
@@ -31,25 +29,20 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film remove(Film film) {
-        Film removeFilm = films.get(film.getId());
-        films.remove(film.getId());
+    public Film remove(Integer id) {
+        Film removeFilm = films.get(id);
+        films.remove(id);
         return removeFilm;
     }
 
     @Override
     public Optional<Film> getById(Integer id) {
-            return Optional.of(films.get(id));
+            return Optional.ofNullable(films.get(id));
     }
 
     @Override
     public List<Film> getList() {
         return new ArrayList<>(films.values());
-    }
-
-    @Override
-    public Map<Integer, Film> findFilm() {
-        return films;
     }
 
     @Override
