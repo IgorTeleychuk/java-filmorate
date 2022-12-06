@@ -16,6 +16,4 @@ public interface FilmStorage {
     Optional<Film> getById(Integer id);
 
     List<Film> getList();
-
-    LocalDate getEarlyDate();
 }

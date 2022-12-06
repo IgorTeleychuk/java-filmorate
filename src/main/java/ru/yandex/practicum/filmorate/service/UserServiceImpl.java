@@ -26,11 +26,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User addNew(User user) {
         nameEqualsLogin(user);
-        if (!user.getLogin().contains(" ")) {
-            return userStorage.addNew(user);
-        } else {
-            throw new ValidationException("The login must not contain gaps");
-        }
+        return userStorage.addNew(user);
     }
 
     @Override
@@ -123,6 +119,9 @@ public class UserServiceImpl implements UserService {
     public void nameEqualsLogin(User user) {
         if ((user.getName() == null) || (user.getName().isBlank())) {
             user.setName(user.getLogin());
+        }
+        if (user.getLogin().contains(" ")) {
+            throw new ValidationException("The login must not contain gaps");
         }
     }
 }

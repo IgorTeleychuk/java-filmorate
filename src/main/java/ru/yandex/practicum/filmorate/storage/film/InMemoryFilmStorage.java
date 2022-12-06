@@ -11,7 +11,6 @@ import java.util.*;
 public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Integer, Film> films = new HashMap<>();
     protected static int nextFilmId = 0;
-    private static final LocalDate earlyDate = LocalDate.of(1895, 12, 28);
 
     @Override
     public Film addNew(Film film) {
@@ -23,7 +22,6 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film update(Film film) {
-        film.setId(film.getId());
         films.put(film.getId(), film);
         return film;
     }
@@ -43,10 +41,5 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public List<Film> getList() {
         return new ArrayList<>(films.values());
-    }
-
-    @Override
-    public LocalDate getEarlyDate() {
-        return earlyDate;
     }
 }
