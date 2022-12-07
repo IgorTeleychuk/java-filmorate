@@ -10,11 +10,9 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.time.LocalDate;
 
 class UserControllerTest {
-    UserController userController;
 
     @BeforeEach
     void beforeEach() {
-        userController = new UserController();
     }
 
     @Test

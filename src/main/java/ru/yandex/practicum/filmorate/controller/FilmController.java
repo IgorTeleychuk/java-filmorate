@@ -1,63 +1,82 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import javax.validation.constraints.Positive;
+import java.util.List;
 
 @Slf4j
+@Validated
 @RestController
 @RequestMapping("/films")
+@RequiredArgsConstructor
 public class FilmController {
+    private final FilmService filmService;
 
-    private final Map<Integer, Film> films = new HashMap<>();
-    protected static int nextFilmId = 0;
-    private final LocalDate earlyDate = LocalDate.of(1895, 12, 28);
+    @GetMapping
+    public List<Film> returnAll() {
+        log.info("Request GET /films received");
+        return filmService.getList();
+    }
+
+    @GetMapping("/{id}")
+    public Film getById(@PathVariable Integer id) {
+        log.info("Request GET /films/{id} received");
+            return filmService.getById(id);
+    }
+
+    @GetMapping("/popular")
+    public List<Film> getPopular(@RequestParam(defaultValue = "10") @Positive Integer count) {
+        log.info("Request GET /films/popular received");
+        return filmService.getPopular(count);
+    }
 
     @PostMapping
-    public Film addNewFilm(@Valid @RequestBody Film film) {
-        filmValidation(film);
-        film.setId(getNextFilmId());
-        films.put(film.getId(), film);
+    @ResponseStatus(HttpStatus.CREATED)
+    public Film addNew(@Valid @RequestBody Film film) {
+        log.info("Request POST /films received");
+        Film addFilm = filmService.addNew(film);
         log.info("A new film has been added");
-        return film;
+        return addFilm;
     }
 
     @PutMapping
-    public Film updateFilm(@Valid @RequestBody Film film) {
-        filmValidation(film);
-        if (!(films.keySet().contains(film.getId()))) {
-            throw new ValidationException("Film unknown");
-        }
-        films.put(film.getId(), film);
+    public Film update(@Valid @RequestBody Film film) {
+        log.info("Request PUT /films received");
+        Film updateFilm = filmService.update(film);
         log.info("Film was updated");
+        return updateFilm;
+    }
+
+    @PutMapping("/{id}/like/{userId}")
+    public Film addLike(@PathVariable Integer id, @PathVariable Integer userId) {
+        log.info("Request PUT /films/{id}/like/{userId} received");
+        Film film = filmService.addLike(id,userId);
+        log.info("Like added!");
         return film;
     }
 
-    @GetMapping
-    public Collection<Film> returnFilms() {
-        Collection<Film> filmList = films.values();
-        log.info("Received a request for a list of movies");
-        return filmList;
+    @DeleteMapping("/{id}")
+    public Film deleteById(@PathVariable Integer id) {
+        log.info("Request DELETE /users/{id}");
+            Film removeFilm = filmService.remove(id);
+            log.info("User was deleted");
+            return removeFilm;
     }
 
-    private boolean filmValidation (Film film) {
-        boolean b = true;
-        if (film.getReleaseDate().isBefore(earlyDate)) {
-            log.info("The film failed validation");
-            b = false;
-            throw new ValidationException("Release date — no earlier than December 28, 1895");
-        }
-        return b;
-    }
+    @DeleteMapping("/{id}/like/{userId}")
+    public Film removeLike(@PathVariable Integer id, @PathVariable Integer userId) {
+        log.info("Request DELETE /films/{id}/like/{userId} received");
+        Film film = filmService.removeLike(id, userId);
+        log.info("FLike was deleted");
+        return film;
 
-    public static int getNextFilmId() {
-        return ++nextFilmId;
     }
 }
