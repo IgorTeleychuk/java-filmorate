@@ -1,47 +1,46 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.dao.daointerface.FriendsStorage;
+import ru.yandex.practicum.filmorate.dao.daointerface.UserStorage;
+import ru.yandex.practicum.filmorate.exception.*;
+import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.service.serviceinterface.UserService;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
-    private final FilmStorage filmStorage;
-    private final UserStorage userStorage;
+    @Qualifier("UserDbStorage")
+    UserStorage userStorage;
+    FriendsStorage friendsStorage;
 
     @Autowired
-    public UserServiceImpl(FilmStorage filmStorage, UserStorage userStorage) {
-        this.filmStorage = filmStorage;
+    public UserServiceImpl(UserStorage userStorage, FriendsStorage friendsStorage) {
         this.userStorage = userStorage;
+        this.friendsStorage = friendsStorage;
     }
 
     @Override
     public User addNew(User user) {
+        Validator.userValid(user);
         nameEqualsLogin(user);
         return userStorage.addNew(user);
     }
 
     @Override
     public User update(User user) {
-        if (userStorage.getById(user.getId()).isPresent()){
-            nameEqualsLogin(user);
+        Validator.userValid(user);
+        nameEqualsLogin(user);
+        getById(user.getId());
         return userStorage.update(user);
-        } else {
-            throw new UserNotFoundException("The user was not found");
-        }
     }
 
     @Override
-    public User remove(Integer id) {
-        return userStorage.remove(id);
+    public void remove(User user) {
+        userStorage.remove(user);
     }
 
     @Override
@@ -56,63 +55,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User addFriend(Integer userId, Integer friendId) {
-        if (userStorage.getById(userId).isPresent() && userStorage.getById(friendId).isPresent()) {
-            User user = userStorage.getById(userId).get();
-            User friendUser = userStorage.getById(friendId).get();
-            user.getFriendsId().add(friendId);
-            friendUser.getFriendsId().add(userId);
-            userStorage.update(friendUser);
-
-            return userStorage.update(user);
-        } else {
-            throw new UserNotFoundException("User or Film was not found");
-        }
-
+    public void addFriend(Integer userId, Integer friendId) {
+        getById(userId);
+        getById(friendId);
+        friendsStorage.addFriend(userId, friendId);
     }
 
     @Override
-    public User removeFriend(Integer userId, Integer friendId) {
-        if (userStorage.getById(userId).isPresent() && userStorage.getById(friendId).isPresent()) {
-            User user = userStorage.getById(userId).get();
-            User friendUser = userStorage.getById(friendId).get();
-            user.getFriendsId().remove(friendUser);
-            friendUser.getFriendsId().remove(user);
-            userStorage.update(friendUser);
-
-            return userStorage.update(user);
-        } else {
-            throw new UserNotFoundException("User or Friend was not found");
-        }
-
+    public void removeFriend(Integer userId, Integer friendId) {
+        friendsStorage.deleteFriend(userId, friendId);
     }
 
     @Override
-    public List<Optional<User>> getCommonFriends(Integer userId, Integer otherId) {
-        if (userStorage.getById(userId).isPresent() && userStorage.getById(otherId).isPresent()) {
-            User user = userStorage.getById(userId).get();
-            User otherUser = userStorage.getById(otherId).get();
-
-            return user.getFriendsId()
-                    .stream()
-                    .filter(otherUser.getFriendsId()::contains)
-                    .map(userStorage::getById)
-                    .collect(Collectors.toList());
-        } else {
-            throw new UserNotFoundException("User or Friend was not found");
-        }
+    public List<User> getCommonFriends(Integer userId, Integer otherId) {
+        return userStorage.commonFriends(userId, otherId);
     }
 
     @Override
-    public List<User> getAllFriends(Integer userId) {
-        if(userStorage.getById(userId).isPresent()) {
-            return userStorage.getById(userId).get().getFriendsId()
-                    .stream()
-                    .map(this::getById)
-                    .collect(Collectors.toList());
-        } else {
-            throw new UserNotFoundException("The user was not found");
-        }
+    public List<User> getFriends(Integer userId) {
+        return userStorage.getFriends(userId);
     }
 
     @Override

@@ -4,12 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.service.serviceinterface.UserService;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -33,11 +32,11 @@ public class UserController {
     @GetMapping("/{id}/friends")
     public List<User> getAllFriends(@PathVariable Integer id) {
         log.info("Request GET /users/{id}/friends received");
-        return  userService.getAllFriends(id);
+        return  userService.getFriends(id);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    public List<Optional<User>> getCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
+    public List<User> getCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
         log.info("Request GET /users/{id}/friends/common/{otherId}");
         return userService.getCommonFriends(id, otherId);
     }
@@ -60,25 +59,27 @@ public class UserController {
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public User addFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
+    public boolean addFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
         log.info("Request PUT /users/{id}/friends/{friendId}");
+        userService.addFriend(id, friendId);
         log.info("Friend was added");
-        return userService.addFriend(id, friendId);
+        return true ;
     }
 
    @DeleteMapping("/{id}")
     public User deleteById(@PathVariable Integer id) {
        log.info("Request DELETE /users/{id}");
-       User removeUser = userService.remove(id);
+       User removeUser = userService.getById(id);
+       userService.remove(removeUser);
        log.info("User was deleted");
        return removeUser;
    }
 
    @DeleteMapping("/{id}/friends/{friendId}")
-    public User removeFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
+    public boolean removeFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
        log.info("Request DELETE /users/{id}/friends/{friendId}");
-       User user = userService.removeFriend(id, friendId);
+       userService.removeFriend(id, friendId);
        log.info("Friend was deleted");
-       return user;
+       return true;
    }
 }
