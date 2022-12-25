@@ -45,7 +45,7 @@ public class DBUserTest {
         assertThat(userOptional)
                 .isPresent()
                 .hasValueSatisfying(user ->
-                        assertThat(user).hasFieldOrPropertyWithValue("id", (long) 1)
+                        assertThat(user).hasFieldOrPropertyWithValue("id", (int) 1)
                 );
     }
 
@@ -84,7 +84,7 @@ public class DBUserTest {
         assertThat(userOptional)
                 .isPresent()
                 .hasValueSatisfying(user ->
-                        assertThat(user).hasFieldOrPropertyWithValue("id", (long) 1)
+                        assertThat(user).hasFieldOrPropertyWithValue("id", (int) 1)
                 );
     }
 
