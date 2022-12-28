@@ -21,11 +21,13 @@ public class MpaController {
 
     @GetMapping()
     public List<Mpa> findAll() {
+        log.info("Request GET /mpa received");
         return mpaService.findAll();
     }
 
     @GetMapping("/{id}")
     public Mpa findByID(@PathVariable int id) {
-        return mpaService.getMPAByID(id);
+        log.info("Request GET /mpa/{id} received");
+        return mpaService.getMpaByID(id);
     }
 }

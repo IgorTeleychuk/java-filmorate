@@ -9,7 +9,7 @@ import javax.validation.constraints.Size;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class    Mpa {
+public class Mpa {
 
     private int id;
     @Size(max = 50)

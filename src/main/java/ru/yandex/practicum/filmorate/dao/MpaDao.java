@@ -1,9 +1,8 @@
 package ru.yandex.practicum.filmorate.dao;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.dao.daointerface.MpaStorage;
 
@@ -12,11 +11,11 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
-@Component
+@Repository
+@Slf4j
 public class MpaDao implements MpaStorage {
 
     private final JdbcTemplate jdbcTemplate;
-    private final Logger log = LoggerFactory.getLogger(MpaDao.class);
 
     public MpaDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -29,7 +28,7 @@ public class MpaDao implements MpaStorage {
     }
 
     @Override
-    public Optional<Mpa> getMPAByID(int id) {
+    public Optional<Mpa> getMpaByID(int id) {
         String sqlQuery = "select * from MOTION_PICTURE_ASSOCIATIONS where MPA_ID = ?";
         List<Mpa> MpaRows = jdbcTemplate.query(sqlQuery, (rs, rowNum) ->
                 makeMpa(rs, rowNum), id);
@@ -42,7 +41,7 @@ public class MpaDao implements MpaStorage {
         }
     }
 
-    private Mpa makeMpa(ResultSet rs, int rowNum) throws SQLException {
+    private static Mpa makeMpa(ResultSet rs, int rowNum) throws SQLException {
         return new Mpa(rs.getInt("MPA_ID"), rs.getString("MPA_NAME"));
     }
 }

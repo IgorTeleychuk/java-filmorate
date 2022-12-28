@@ -7,7 +7,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.serviceinterface.FilmService;
-import ru.yandex.practicum.filmorate.service.serviceinterface.UserService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -20,8 +19,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FilmController {
     private final FilmService filmService;
-    private final UserService userService;
-
 
     @GetMapping
     public List<Film> returnAll() {
@@ -61,7 +58,6 @@ public class FilmController {
     @PutMapping("/{id}/like/{userId}")
     public boolean addLike(@PathVariable Integer id, @PathVariable Integer userId) {
         log.info("Request PUT /films/{id}/like/{userId} received");
-        userService.getById(userId);
         filmService.addLike(id, userId);
         log.info("Like added!");
         return true;
@@ -78,7 +74,6 @@ public class FilmController {
     @DeleteMapping("/{id}/like/{userId}")
     public boolean removeLike(@PathVariable Integer id, @PathVariable Integer userId) {
         log.info("Request DELETE /films/{id}/like/{userId} received");
-        userService.getById(userId);
         filmService.removeLike(id, userId);
         log.info("FLike was deleted");
         return true;

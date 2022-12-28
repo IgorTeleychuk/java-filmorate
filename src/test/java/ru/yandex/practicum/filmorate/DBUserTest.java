@@ -112,7 +112,7 @@ public class DBUserTest {
         List<User> friends = new ArrayList<>();
         friends.add(user2);
         friendsStorage.addFriend(1, 2);
-        assertTrue(friends.equals(userStorage.getFriends(1)),
+        assertTrue(friends.equals(friendsStorage.getFriends(1)),
                 "The list with all users is not equal to the expected one");
     }
 }

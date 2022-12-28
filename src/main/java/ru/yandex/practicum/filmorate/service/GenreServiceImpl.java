@@ -1,23 +1,19 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.service.serviceinterface.GenreService;
 import ru.yandex.practicum.filmorate.exception.GenreNotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.dao.daointerface.GenreStorage;
-import ru.yandex.practicum.filmorate.service.serviceinterface.GenreService;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class GenreServiceImpl implements GenreService {
 
-    GenreStorage genreStorage;
-
-    @Autowired
-    public GenreServiceImpl(GenreStorage genreStorage) {
-        this.genreStorage = genreStorage;
-    }
+    private final GenreStorage genreStorage;
 
     @Override
     public List<Genre> findAll() {
@@ -25,7 +21,7 @@ public class GenreServiceImpl implements GenreService {
     }
 
     @Override
-    public Genre getGenreByID(int id) {
-        return genreStorage.getGenreByID(id).orElseThrow(() -> new GenreNotFoundException("Genre with " + id + " not found."));
+    public Genre getGenreById(int id) {
+        return genreStorage.getGenreById(id).orElseThrow(() -> new GenreNotFoundException("Genre with " + id + " not found."));
     }
 }

@@ -1,38 +1,30 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.daointerface.FilmStorage;
 import ru.yandex.practicum.filmorate.dao.daointerface.LikesStorage;
+import ru.yandex.practicum.filmorate.service.serviceinterface.FilmService;
 import ru.yandex.practicum.filmorate.exception.*;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.serviceinterface.FilmService;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class FilmServiceImpl implements FilmService {
     @Qualifier("FilmDbStorage")
-    FilmStorage filmStorage;
-    LikesStorage likesStorage;
-
-    @Autowired
-    public FilmServiceImpl(FilmStorage filmStorage, LikesStorage likesStorage) {
-        this.filmStorage = filmStorage;
-        this.likesStorage = likesStorage;
-    }
+    private final FilmStorage filmStorage;
+    private final LikesStorage likesStorage;
 
     @Override
     public Film addNew(Film film) {
-        Validator.filmValid(film);
         return filmStorage.addNew(film);
     }
 
     @Override
     public Film update(Film film) {
-        Validator.filmValid(film);
         getById(film.getId());
         return filmStorage.update(film);
     }

@@ -1,9 +1,8 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.MpaNotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.dao.daointerface.MpaStorage;
 import ru.yandex.practicum.filmorate.service.serviceinterface.MpaService;
@@ -11,14 +10,10 @@ import ru.yandex.practicum.filmorate.service.serviceinterface.MpaService;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class MpaServiceImpl implements MpaService {
 
-    MpaStorage mpaStorage;
-
-    @Autowired
-    public MpaServiceImpl(MpaStorage mpaStorage) {
-        this.mpaStorage = mpaStorage;
-    }
+    private final MpaStorage mpaStorage;
 
     @Override
     public List<Mpa> findAll() {
@@ -26,8 +21,8 @@ public class MpaServiceImpl implements MpaService {
     }
 
     @Override
-    public Mpa getMPAByID(int id) {
-        return mpaStorage.getMPAByID(id).orElseThrow(() -> new MpaNotFoundException("Rating MPA with " + id +
+    public Mpa getMpaByID(int id) {
+        return mpaStorage.getMpaByID(id).orElseThrow(() -> new MpaNotFoundException("Rating MPA with " + id +
                 " not found."));
     }
 }

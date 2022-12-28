@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.daointerface.FriendsStorage;
@@ -12,27 +12,20 @@ import ru.yandex.practicum.filmorate.service.serviceinterface.UserService;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     @Qualifier("UserDbStorage")
-    UserStorage userStorage;
-    FriendsStorage friendsStorage;
-
-    @Autowired
-    public UserServiceImpl(UserStorage userStorage, FriendsStorage friendsStorage) {
-        this.userStorage = userStorage;
-        this.friendsStorage = friendsStorage;
-    }
+    private final UserStorage userStorage;
+    private final FriendsStorage friendsStorage;
 
     @Override
     public User addNew(User user) {
-        Validator.userValid(user);
         nameEqualsLogin(user);
         return userStorage.addNew(user);
     }
 
     @Override
     public User update(User user) {
-        Validator.userValid(user);
         nameEqualsLogin(user);
         getById(user.getId());
         return userStorage.update(user);
@@ -68,12 +61,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> getCommonFriends(Integer userId, Integer otherId) {
-        return userStorage.commonFriends(userId, otherId);
+        return friendsStorage.commonFriends(userId, otherId);
     }
 
     @Override
     public List<User> getFriends(Integer userId) {
-        return userStorage.getFriends(userId);
+        return friendsStorage.getFriends(userId);
     }
 
     @Override

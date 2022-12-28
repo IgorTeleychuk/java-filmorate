@@ -1,13 +1,13 @@
 package ru.yandex.practicum.filmorate.dao;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ParameterizedPreparedStatementSetter;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -18,29 +18,20 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
-@Component()
-@Primary
+@Repository()
+@Slf4j
+@RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
-    private final Logger log = LoggerFactory.getLogger(UserDbStorage.class);
-    private final MpaDao mpaDao;
     private final GenreDao genreDao;
-
-    @Autowired
-    public FilmDbStorage(JdbcTemplate jdbcTemplate, MpaDao mpaDao, GenreDao genreDao) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.mpaDao = mpaDao;
-        this.genreDao = genreDao;
-    }
 
     @Override
     public List<Film> getList() {
-        String sqlQuery = "select * from FILMS";
+        String sqlQuery = "select * from FILMS as f inner join MOTION_PICTURE_ASSOCIATIONS as mpa on f.MPA_ID = mpa.MPA_ID";
         return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> makeFilm(rs, rowNum));
     }
 
@@ -76,7 +67,6 @@ public class FilmDbStorage implements FilmStorage {
                 film.getDuration(),
                 film.getMpa().getId(),
                 film.getId());
-        film.setMpa(mpaDao.getMPAByID(film.getMpa().getId()).get());
         deleteGenres(film.getId());
         film.getGenres().forEach(genre -> addGenre(film.getId(), genre.getId()));
         film.setGenres(new HashSet<>(getGenres(film.getId())));
@@ -93,7 +83,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Optional<Film> getById(Integer id) {
-        String sqlQuery = "select * from FILMS where FILM_ID = ?";
+        String sqlQuery = "select * from FILMS as f inner join MOTION_PICTURE_ASSOCIATIONS as mpa on f.MPA_ID = mpa.MPA_ID where FILM_ID = ?";
         List<Film> filmRows = jdbcTemplate.query(sqlQuery, (rs, rowNum) -> makeFilm(rs, rowNum), id);
         if (filmRows.size() > 0) {
             Film film = filmRows.get(0);
@@ -109,7 +99,7 @@ public class FilmDbStorage implements FilmStorage {
         String sqlQuery = "select g.GENRE_ID AS GENRE_ID, g.GENRE_NAME from FILM_GENRES AS fg " +
                 "LEFT OUTER JOIN GENRES AS g ON fg.GENRE_ID = g.GENRE_ID " +
                 "WHERE FILM_ID = ?" + "ORDER BY GENRE_ID ";
-        return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> genreDao.getGenreByID(
+        return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> genreDao.getGenreById(
                 rs.getInt("GENRE_ID")).get(), filmID);
     }
 
@@ -130,12 +120,13 @@ public class FilmDbStorage implements FilmStorage {
     public List<Film> getPopularFilm(int count) {
         StringBuilder str = new StringBuilder();
 
-        str.append("SELECT f.* ")
+        str.append("SELECT * ")
                 .append("FROM FILMS AS f ")
+                .append("INNER JOIN MOTION_PICTURE_ASSOCIATIONS as mpa on f.MPA_ID = mpa.MPA_ID ")
                 .append("LEFT OUTER JOIN LIKES AS l ON f.FILM_ID = l.FILM_ID ")
                 .append("GROUP BY f.FILM_ID ")
                 .append("ORDER BY COUNT(l.USER_ID) DESC ")
-                .append("LIMIT ?");
+                .append("LIMIT ? ");
 
         String sqlQuery = str.toString();
         return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> makeFilm(rs, rowNum), count);
@@ -147,13 +138,14 @@ public class FilmDbStorage implements FilmStorage {
         String description = rs.getString("DESCRIPTION");
         Date releaseDate = rs.getDate("RELEASE_DATE");
         int duration = rs.getInt("DURATION");
-        Mpa mpa = mpaDao.getMPAByID(rs.getInt("MPA_ID")).get();
+        int mpa_id = rs.getInt("MPA_ID");
+        String mpa_name = rs.getString("MPA_NAME");
+        Mpa mpa = new Mpa(mpa_id, mpa_name);
         LocalDate filmRelease = null;
         if (releaseDate != null) {
             filmRelease = releaseDate.toLocalDate();
         }
-        Film film = new Film(id, name, description, filmRelease, duration, mpa, null);
-        film.setGenres(new HashSet<>(getGenres(id)));
+        Film film = new Film(id, name, description, filmRelease, duration, mpa, new HashSet<>(getGenres(id)));
         return film;
     }
 }

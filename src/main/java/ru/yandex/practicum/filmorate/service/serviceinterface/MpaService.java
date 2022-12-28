@@ -7,5 +7,5 @@ import java.util.List;
 public interface MpaService {
     List<Mpa> findAll();
 
-    Mpa getMPAByID(int id);
+    Mpa getMpaByID(int id);
 }
