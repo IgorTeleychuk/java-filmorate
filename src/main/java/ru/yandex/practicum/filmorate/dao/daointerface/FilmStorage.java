@@ -17,8 +17,6 @@ public interface FilmStorage {
 
     List<Film> getList();
 
-    List<Genre> getGenres(int filmID);
-
     void deleteGenres(int filmID);
 
     void addGenre(int filmId, int genreId);

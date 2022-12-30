@@ -9,8 +9,6 @@ public interface FriendsStorage {
 
     void deleteFriend(long userId, long friendId);
 
-    boolean checkFriendshipStatus (long userId, long friendId);
-
     List<User> getFriends(Integer userId);
 
     List<User> commonFriends(Integer userId, Integer friendId);

@@ -14,7 +14,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    @Qualifier("UserDbStorage")
+
     private final UserStorage userStorage;
     private final FriendsStorage friendsStorage;
 

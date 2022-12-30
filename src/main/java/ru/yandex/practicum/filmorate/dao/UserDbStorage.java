@@ -9,6 +9,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.dao.daointerface.UserStorage;
 
@@ -70,7 +71,7 @@ public class UserDbStorage implements UserStorage {
         if(jdbcTemplate.update(sqlQuery, user.getId()) >0) {
             log.info("User with ID {} was remove", user.getId());
         } else {
-            throw new RuntimeException("Couldn't delete user with id " + user.getId());
+            throw new UserNotFoundException("Couldn't delete user with id " + user.getId());
         }
     }
 

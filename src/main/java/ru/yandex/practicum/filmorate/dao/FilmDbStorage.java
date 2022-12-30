@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ParameterizedPreparedStatementSetter;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
@@ -19,7 +18,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Repository()
 @Slf4j
@@ -27,7 +25,6 @@ import java.util.stream.Collectors;
 public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
-    private final GenreDao genreDao;
 
     @Override
     public List<Film> getList() {
@@ -50,8 +47,7 @@ public class FilmDbStorage implements FilmStorage {
             return stmt;
         }, keyHolder);
         film.setId(keyHolder.getKey().intValue());
-        film.getGenres().forEach(genre -> addGenre(film.getId(), genre.getId()));
-        film.setGenres(new HashSet<>(getGenres(film.getId())));
+        saveGenresToFilm(film);
         return film;
     }
 
@@ -68,9 +64,29 @@ public class FilmDbStorage implements FilmStorage {
                 film.getMpa().getId(),
                 film.getId());
         deleteGenres(film.getId());
-        film.getGenres().forEach(genre -> addGenre(film.getId(), genre.getId()));
-        film.setGenres(new HashSet<>(getGenres(film.getId())));
+        saveGenresToFilm(film);
         return film;
+    }
+
+    private void saveGenresToFilm(Film film) {
+        final Integer filmId = film.getId();
+        final LinkedHashSet<Genre> genres = film.getGenres();
+        if (genres == null || genres.isEmpty()) {
+            return;
+        }
+        final ArrayList<Genre> genreList = new ArrayList<>(genres);
+        jdbcTemplate.batchUpdate(
+                "insert into FILM_GENRES (FILM_ID, GENRE_ID) values (?, ?)",
+                new BatchPreparedStatementSetter() {
+                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+                        ps.setLong(1, filmId);
+                        ps.setLong(2, genreList.get(i).getId());
+                    }
+
+                    public int getBatchSize() {
+                        return genreList.size();
+                    }
+                });
     }
 
     @Override
@@ -92,15 +108,6 @@ public class FilmDbStorage implements FilmStorage {
         } else {
             return Optional.empty();
         }
-    }
-
-    @Override
-    public List<Genre> getGenres(int filmID) {
-        String sqlQuery = "select g.GENRE_ID AS GENRE_ID, g.GENRE_NAME from FILM_GENRES AS fg " +
-                "LEFT OUTER JOIN GENRES AS g ON fg.GENRE_ID = g.GENRE_ID " +
-                "WHERE FILM_ID = ?" + "ORDER BY GENRE_ID ";
-        return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> genreDao.getGenreById(
-                rs.getInt("GENRE_ID")).get(), filmID);
     }
 
     @Override
@@ -142,10 +149,31 @@ public class FilmDbStorage implements FilmStorage {
         String mpa_name = rs.getString("MPA_NAME");
         Mpa mpa = new Mpa(mpa_id, mpa_name);
         LocalDate filmRelease = null;
+
+
         if (releaseDate != null) {
             filmRelease = releaseDate.toLocalDate();
         }
-        Film film = new Film(id, name, description, filmRelease, duration, mpa, new HashSet<>(getGenres(id)));
+        Film film = new Film(id, name, description, filmRelease, duration, mpa);
+
+        film.setGenres(makeFilmGenres(film.getId()));
         return film;
+    }
+
+    private LinkedHashSet<Genre> makeFilmGenres(Integer filmId) {
+        String sqlQuery = "SELECT GENRE_ID FROM FILM_GENRES WHERE FILM_ID=?";
+        LinkedHashSet<Genre>  set = new LinkedHashSet<>();
+        for (Integer integer : jdbcTemplate.queryForList(sqlQuery, Integer.class, filmId)) {
+            Genre genreById = jdbcTemplate.queryForObject("SELECT * FROM GENRES where GENRE_ID = ?",
+                    (rs, rowNum) -> {
+                        Integer id = rs.getInt("GENRE_ID");
+                        String name = rs.getString("GENRE_NAME");
+                        Genre makeGenre = new Genre(id);
+                        makeGenre.setName(name);
+                        return makeGenre;
+                    }, integer);
+            set.add(genreById);
+        }
+        return set;
     }
 }

@@ -1,9 +1,9 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.daointerface.FilmStorage;
+import ru.yandex.practicum.filmorate.dao.daointerface.GenreStorage;
 import ru.yandex.practicum.filmorate.dao.daointerface.LikesStorage;
 import ru.yandex.practicum.filmorate.service.serviceinterface.FilmService;
 import ru.yandex.practicum.filmorate.exception.*;
@@ -14,9 +14,10 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class FilmServiceImpl implements FilmService {
-    @Qualifier("FilmDbStorage")
+
     private final FilmStorage filmStorage;
     private final LikesStorage likesStorage;
+    private final GenreStorage genreStorage;
 
     @Override
     public Film addNew(Film film) {

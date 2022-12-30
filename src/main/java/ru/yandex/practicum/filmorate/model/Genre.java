@@ -14,4 +14,8 @@ public class Genre {
     private int id;
     @Size(max = 50)
     private String name;
+
+    public Genre(Integer id) {
+        this.id = id;
+    }
 }

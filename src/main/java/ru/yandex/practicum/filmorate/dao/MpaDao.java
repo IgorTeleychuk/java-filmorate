@@ -33,9 +33,9 @@ public class MpaDao implements MpaStorage {
         List<Mpa> MpaRows = jdbcTemplate.query(sqlQuery, (rs, rowNum) ->
                 makeMpa(rs, rowNum), id);
         if (MpaRows.size() > 0) {
-            Mpa MPA = MpaRows.get(0);
-            log.info("The MPA rating by id was found: {} {}", MPA.getName(), id);
-            return Optional.of(MPA);
+            Mpa mpa = MpaRows.get(0);
+            log.info("The MPA rating by id was found: {} {}", mpa.getName(), id);
+            return Optional.of(mpa);
         } else {
             return Optional.empty();
         }

@@ -32,23 +32,7 @@ public class FriendsDao implements FriendsStorage {
     @Override
     public void deleteFriend(long userId, long friendId) {
         String sqlQuery = "delete from FRIENDS where USER_ID = ? AND FRIEND_ID = ?";
-        if(jdbcTemplate.update(sqlQuery, userId, friendId) > 0) {
-            if (checkFriendshipStatus(userId, friendId)) {
-                addFriend(friendId, userId);
-            }
-        } else {
-            throw new RuntimeException("Failed to delete a friend with id " + friendId + "user with an id " + userId);
-        }
-    }
-
-    @Override
-    public boolean checkFriendshipStatus (long userId, long friendId) {
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from FRIENDS where FRIEND_ID = ? AND USER_ID = ?",
-                userId, friendId);
-        if(userRows.next()) {
-            return true;
-        }
-        return false;
+        jdbcTemplate.update(sqlQuery, userId, friendId);
     }
 
     @Override

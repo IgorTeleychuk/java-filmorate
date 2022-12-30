@@ -28,15 +28,15 @@ public class DBFilmTest {
     private final FilmDbStorage filmStorage;
 
     private Mpa mpa;
-    private Set<Genre> genre;
+    private LinkedHashSet<Genre> genre;
     private Film film;
 
 
     @BeforeEach
     public void createFilm() {
         mpa = new Mpa(2, "PG");
-        genre = new HashSet<>();
-        genre.add(new Genre(1, "Comedy"));
+        genre = new LinkedHashSet<>();
+        genre.add(new Genre(1, "Комедия"));
         film = new Film();
         film.setName("Back to the Future");
         film.setDescription("Genre: Science fiction, Comedy, Adventure");
