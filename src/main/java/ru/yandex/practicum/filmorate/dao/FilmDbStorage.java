@@ -151,13 +151,10 @@ public class FilmDbStorage implements FilmStorage {
         Mpa mpa = new Mpa(mpa_id, mpa_name);
         LocalDate filmRelease = null;
 
-
         if (releaseDate != null) {
             filmRelease = releaseDate.toLocalDate();
         }
         Film film = new Film(id, name, description, filmRelease, duration, mpa);
-
-        //film.setGenres(makeFilmGenres(film.getId()));
         return film;
     }
 
