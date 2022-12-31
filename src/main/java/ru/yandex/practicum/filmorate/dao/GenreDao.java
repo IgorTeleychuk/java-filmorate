@@ -11,10 +11,7 @@ import ru.yandex.practicum.filmorate.dao.daointerface.GenreStorage;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Repository
 @Slf4j
@@ -41,6 +38,33 @@ public class GenreDao implements GenreStorage {
             return Optional.of(genre);
         } else {
             return Optional.empty();
+        }
+    }
+
+    @Override
+    public void makeFilmGenres(List<Film> list) {
+        String sqlQuery = "SELECT GENRE_ID FROM FILM_GENRES WHERE FILM_ID=?";
+        LinkedHashSet<Genre> set = new LinkedHashSet<>();
+
+        for (Film film: list) {
+            //System.out.println(film.getName()+ "11111111111111111111" + film.getGenres());
+            set.clear();
+            for (Integer integer : jdbcTemplate.queryForList(sqlQuery, Integer.class, film.getId())) {
+                Genre genreById = jdbcTemplate.queryForObject("SELECT * FROM GENRES where GENRE_ID = ?",
+                        (rs, rowNum) -> {
+//                            Integer id = rs.getInt("GENRE_ID");
+//                            String name = rs.getString("GENRE_NAME");
+//                            Genre makeGenre = new Genre(id);
+//                            makeGenre.setName(name);
+                            Genre newGenre = new Genre(rs.getInt("GENRE_ID"), rs.getString("GENRE_NAME"));
+                            return newGenre;
+                        }, integer);
+                set.add(genreById);
+                //System.out.println(film.getName()+ "222222222222222222" + set);
+            }
+            //System.out.println(film.getName()+ "33333333333333333" + set);
+            film.setGenres(set);
+            //System.out.println(film.getName()+ "444444444444444444" + film.getGenres());
         }
     }
 

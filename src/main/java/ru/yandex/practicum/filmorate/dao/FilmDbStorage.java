@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -98,15 +99,15 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Optional<Film> getById(Integer id) {
+    public List<Film> getById(Integer id) {
         String sqlQuery = "select * from FILMS as f inner join MOTION_PICTURE_ASSOCIATIONS as mpa on f.MPA_ID = mpa.MPA_ID where FILM_ID = ?";
         List<Film> filmRows = jdbcTemplate.query(sqlQuery, (rs, rowNum) -> makeFilm(rs, rowNum), id);
         if (filmRows.size() > 0) {
             Film film = filmRows.get(0);
             log.info("Found a film: id: {}, name: {}", film.getId(), film.getName());
-            return Optional.of(film);
+            return filmRows;
         } else {
-            return Optional.empty();
+            throw new FilmNotFoundException("Film not found");
         }
     }
 
@@ -156,7 +157,7 @@ public class FilmDbStorage implements FilmStorage {
         }
         Film film = new Film(id, name, description, filmRelease, duration, mpa);
 
-        film.setGenres(makeFilmGenres(film.getId()));
+        //film.setGenres(makeFilmGenres(film.getId()));
         return film;
     }
 

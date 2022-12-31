@@ -13,7 +13,7 @@ public interface FilmStorage {
 
     void remove(Film film);
 
-    Optional<Film> getById(Integer id);
+    List<Film> getById(Integer id);
 
     List<Film> getList();
 

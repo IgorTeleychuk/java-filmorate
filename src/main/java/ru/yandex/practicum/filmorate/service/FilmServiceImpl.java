@@ -6,9 +6,9 @@ import ru.yandex.practicum.filmorate.dao.daointerface.FilmStorage;
 import ru.yandex.practicum.filmorate.dao.daointerface.GenreStorage;
 import ru.yandex.practicum.filmorate.dao.daointerface.LikesStorage;
 import ru.yandex.practicum.filmorate.service.serviceinterface.FilmService;
-import ru.yandex.practicum.filmorate.exception.*;
 import ru.yandex.practicum.filmorate.model.Film;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -37,13 +37,23 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public Film getById(Integer id) {
-        return filmStorage.getById(id).orElseThrow(() -> new UserNotFoundException("Film with " +
-                id + " not found."));
+        List<Film> filmAll = filmStorage.getById(id);
+        genreStorage.makeFilmGenres(filmAll);
+        return filmAll.get(0);
     }
 
     @Override
     public List<Film> getList() {
-        return filmStorage.getList();
+        List<Film> makeGenre = new ArrayList<>();
+        List<Film> getList = new ArrayList<>();
+        for(Film film : filmStorage.getList()){
+            makeGenre.clear();
+            makeGenre.add(film);
+            genreStorage.makeFilmGenres(makeGenre);
+            getList.add(film);
+        }
+
+        return getList;
     }
 
     @Override
@@ -61,6 +71,8 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public List<Film> getPopular(int count) {
-        return filmStorage.getPopularFilm(count);
+        List<Film> filmPopular = filmStorage.getPopularFilm(count);
+        genreStorage.makeFilmGenres(filmPopular);
+        return filmPopular;
     }
 }

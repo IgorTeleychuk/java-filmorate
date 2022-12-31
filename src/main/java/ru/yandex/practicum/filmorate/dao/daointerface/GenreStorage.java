@@ -12,5 +12,7 @@ public interface GenreStorage {
 
     Optional<Genre> getGenreById(int id);
 
+    void makeFilmGenres (List<Film> list);
+
 
 }
