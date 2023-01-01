@@ -71,7 +71,7 @@ public class FilmDbStorage implements FilmStorage {
 
     private void saveGenresToFilm(Film film) {
         final Integer filmId = film.getId();
-        final LinkedHashSet<Genre> genres = film.getGenres();
+        final LinkedHashSet<Genre> genres =film.getGenres();
         if (genres == null || genres.isEmpty()) {
             return;
         }
@@ -119,12 +119,6 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public void addGenre(int filmId, int genreId) {
-        String sqlQuery = "merge into FILM_GENRES(FILM_ID, GENRE_ID) values (?, ?)";
-        jdbcTemplate.update(sqlQuery, filmId, genreId);
-    }
-
-    @Override
     public List<Film> getPopularFilm(int count) {
         StringBuilder str = new StringBuilder();
 
@@ -156,22 +150,5 @@ public class FilmDbStorage implements FilmStorage {
         }
         Film film = new Film(id, name, description, filmRelease, duration, mpa);
         return film;
-    }
-
-    private LinkedHashSet<Genre> makeFilmGenres(Integer filmId) {
-        String sqlQuery = "SELECT GENRE_ID FROM FILM_GENRES WHERE FILM_ID=?";
-        LinkedHashSet<Genre>  set = new LinkedHashSet<>();
-        for (Integer integer : jdbcTemplate.queryForList(sqlQuery, Integer.class, filmId)) {
-            Genre genreById = jdbcTemplate.queryForObject("SELECT * FROM GENRES where GENRE_ID = ?",
-                    (rs, rowNum) -> {
-                        Integer id = rs.getInt("GENRE_ID");
-                        String name = rs.getString("GENRE_NAME");
-                        Genre makeGenre = new Genre(id);
-                        makeGenre.setName(name);
-                        return makeGenre;
-                    }, integer);
-            set.add(genreById);
-        }
-        return set;
     }
 }

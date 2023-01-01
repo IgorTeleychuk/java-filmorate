@@ -10,6 +10,8 @@ import ru.yandex.practicum.filmorate.dao.daointerface.GenreStorage;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Repository
 @Slf4j
@@ -40,23 +42,17 @@ public class GenreDao implements GenreStorage {
     }
 
     @Override
-    public void makeFilmGenres(List<Film> list) {
-        String sqlQuery = "SELECT GENRE_ID FROM FILM_GENRES WHERE FILM_ID=?";
-        LinkedHashSet<Genre> set = new LinkedHashSet<>();
-
-        for (Film film: list) {
-            set.clear();
-            for (Integer integer : jdbcTemplate.queryForList(sqlQuery, Integer.class, film.getId())) {
-                Genre genreById = jdbcTemplate.queryForObject("SELECT * FROM GENRES where GENRE_ID = ?",
-                        (rs, rowNum) -> {
-                            Genre newGenre = new Genre(rs.getInt("GENRE_ID"),
-                                    rs.getString("GENRE_NAME"));
-                            return newGenre;
-                        }, integer);
-                set.add(genreById);
-            }
+    public void loadGenreToFilm(List<Film> list) {
+        String inSql = String.join(",", Collections.nCopies(list.size(), "?"));
+        final Map<Integer, Film> filmById = list.stream().collect(Collectors.toMap(Film::getId, Function.identity()));
+        final LinkedHashSet<Genre> set = new LinkedHashSet<>();
+        final String sqlQuery = "select * from GENRES as g, FILM_GENRES as fg where fg.genre_id = g.genre_id and fg.film_id " +
+                "in (" + inSql + ")";
+        jdbcTemplate.query(sqlQuery, (rs) -> {
+            final Film film = filmById.get(rs.getInt("FILM_ID"));
+            set.add(makeGenre(rs, 0));
             film.setGenres(set);
-        }
+        }, list.stream().map(Film::getId).toArray());
     }
 
     private static Genre makeGenre(ResultSet rs, int rowNum) throws SQLException {

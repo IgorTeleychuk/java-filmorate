@@ -38,7 +38,7 @@ public class FilmServiceImpl implements FilmService {
     @Override
     public Film getById(Integer id) {
         List<Film> filmAll = filmStorage.getById(id);
-        genreStorage.makeFilmGenres(filmAll);
+        genreStorage.loadGenreToFilm(filmAll);
         return filmAll.get(0);
     }
 
@@ -49,7 +49,7 @@ public class FilmServiceImpl implements FilmService {
         for(Film film : filmStorage.getList()){
             makeGenre.clear();
             makeGenre.add(film);
-            genreStorage.makeFilmGenres(makeGenre);
+            genreStorage.loadGenreToFilm(makeGenre);
             getList.add(film);
         }
 
@@ -72,7 +72,7 @@ public class FilmServiceImpl implements FilmService {
     @Override
     public List<Film> getPopular(int count) {
         List<Film> filmPopular = filmStorage.getPopularFilm(count);
-        genreStorage.makeFilmGenres(filmPopular);
+        genreStorage.loadGenreToFilm(filmPopular);
         return filmPopular;
     }
 }
