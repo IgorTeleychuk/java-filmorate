@@ -42,17 +42,15 @@ public class GenreDao implements GenreStorage {
     }
 
     @Override
-    public void loadGenreToFilm(List<Film> list) {
-        String inSql = String.join(",", Collections.nCopies(list.size(), "?"));
-        final Map<Integer, Film> filmById = list.stream().collect(Collectors.toMap(Film::getId, Function.identity()));
-        final LinkedHashSet<Genre> set = new LinkedHashSet<>();
+    public void loadGenreToFilm(List<Film> films) {
+        String inSql = String.join(",", Collections.nCopies(films.size(), "?"));
+        final Map<Integer, Film> filmById = films.stream().collect(Collectors.toMap(Film::getId, Function.identity()));
         final String sqlQuery = "select * from GENRES as g, FILM_GENRES as fg where fg.genre_id = g.genre_id and fg.film_id " +
                 "in (" + inSql + ")";
         jdbcTemplate.query(sqlQuery, (rs) -> {
             final Film film = filmById.get(rs.getInt("FILM_ID"));
-            set.add(makeGenre(rs, 0));
-            film.setGenres(set);
-        }, list.stream().map(Film::getId).toArray());
+            film.getGenres().add(makeGenre(rs, 0));
+        }, films.stream().map(Film::getId).toArray());
     }
 
     private static Genre makeGenre(ResultSet rs, int rowNum) throws SQLException {

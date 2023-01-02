@@ -30,7 +30,7 @@ public class Film {
     private int duration;
     @NotNull
     private Mpa mpa;
-    private LinkedHashSet<Genre> genres;
+    private LinkedHashSet<Genre> genres = new LinkedHashSet<>();
 
     public Film(int id, String name, String description, LocalDate releaseDate, Integer duration, Mpa mpa) {
         this.id = id;
