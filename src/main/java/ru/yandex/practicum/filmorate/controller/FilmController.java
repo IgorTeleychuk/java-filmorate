@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.serviceinterface.FilmService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -56,27 +56,27 @@ public class FilmController {
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public Film addLike(@PathVariable Integer id, @PathVariable Integer userId) {
+    public boolean addLike(@PathVariable Integer id, @PathVariable Integer userId) {
         log.info("Request PUT /films/{id}/like/{userId} received");
-        Film film = filmService.addLike(id,userId);
+        filmService.addLike(id, userId);
         log.info("Like added!");
-        return film;
+        return true;
     }
 
     @DeleteMapping("/{id}")
-    public Film deleteById(@PathVariable Integer id) {
+    public void deleteById(@PathVariable Integer id) {
         log.info("Request DELETE /users/{id}");
-            Film removeFilm = filmService.remove(id);
-            log.info("User was deleted");
-            return removeFilm;
+        Film removeFilm = filmService.getById(id);
+        filmService.remove(removeFilm);
+        log.info("User was deleted");
     }
 
     @DeleteMapping("/{id}/like/{userId}")
-    public Film removeLike(@PathVariable Integer id, @PathVariable Integer userId) {
+    public boolean removeLike(@PathVariable Integer id, @PathVariable Integer userId) {
         log.info("Request DELETE /films/{id}/like/{userId} received");
-        Film film = filmService.removeLike(id, userId);
+        filmService.removeLike(id, userId);
         log.info("FLike was deleted");
-        return film;
+        return true;
 
     }
 }
